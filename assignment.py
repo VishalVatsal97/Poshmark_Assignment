@@ -15,50 +15,45 @@ input_instances = {"us-east":{
 
 server_list_map = ["large","xlarge","2xlarge","4xlarge","8xlarge","10xlarge"]
 
-def serverwithboth(no_cpu,sum_li,server_list,cost_list,max_price):
+def serverWithCpuPrice(no_cpu,sum_li,server_list,cost_list,max_price):
 	i = len(server_list)
 	ans = [0 for q in range(i)]
 	cost_margin = [0 for p in range(i)]
-	while sum(cost_margin) <= max_price :
-				print("XXXXXXXXXX")						
-				if no_cpu > sum_li :
-						#print("YYYYYYY")
-						if(sum(cost_list[0:i]) <= max_price):
-							#print("ZZZZZZZZ")
-							if sum_li > 0:
-								incr = no_cpu // sum_li
-								no_cpu = no_cpu % sum_li
-							else:
-								ans[0] = ans[0] + 1
-								break
-							for x in range(i):
-								if server_list[x] > 0 :
-									#print("AAAAAAAAAAAAAAA")
-									ans[x] += incr
-								else:
-									ans[x] = 0
-							cost_margin = [a*b for a,b in zip(ans,cost_list)]
-							if sum(cost_margin) > max_price:
-								for x in range(i):
-									if server_list[x] > 0 :
-										#print("BBBBBBBBBB")
-										ans[x] -= incr
-								sum_li = sum_li - server_list[i-1]
-								i = i - 1
-										
-						else:
-							if server_list[i-1] > 0:
-								sum_li = sum_li - server_list[i-1]
-							i = i -1
+	while sum(cost_margin) <= max_price :					
+		if no_cpu > sum_li :	
+			if(sum(cost_list[0:i]) <= max_price):				
+				if sum_li > 0:
+					incr = no_cpu // sum_li
+					no_cpu = no_cpu % sum_li
 				else:
-					if server_list[i-1] > 0:
-						sum_li = sum_li - server_list[i-1]
-					i = i -1
+					ans[0] = ans[0] + 1
+					break
+				for x in range(i):
+					if server_list[x] > 0 :							
+						ans[x] += incr
+					else:
+						ans[x] = 0
+				cost_margin = [a*b for a,b in zip(ans,cost_list)]
+				if sum(cost_margin) > max_price:
+					for x in range(i):
+						if server_list[x] > 0 :				
+							ans[x] -= incr
+					sum_li = sum_li - server_list[i-1]
+					i = i - 1
+										
+			else:
+				if server_list[i-1] > 0:
+					sum_li = sum_li - server_list[i-1]
+				i = i -1
+		else:
+			if server_list[i-1] > 0:
+				sum_li = sum_li - server_list[i-1]
+			i = i -1
 			
 	return ans
 
   
-def serverwithnoprice(no_cpu,sum_li,server_list):
+def serverWithNoprice(no_cpu,sum_li,server_list):
 
 	i = len(server_list)
 	ans = [0 for q in range(i)]
@@ -97,6 +92,17 @@ def serverWithnoCPU(price,cost_list,server_list):
 			i = i-1
 	return ans
 
+
+def getServerCombination(server_combination_t,total_cost,cost_list_h,server_combination):
+
+	server_combination_t = [float(val) for val in server_combination_t]
+	
+	total_cost.append([a*b for a,b in zip(server_combination_t,cost_list_h)])
+	
+	server_combination.append(server_combination_t)
+
+	return server_combination,total_cost
+
 def setupServerCostList(server_list_map,hours,cpus,price):
 	server_combination_t = []
 	server_combination = []
@@ -114,25 +120,21 @@ def setupServerCostList(server_list_map,hours,cpus,price):
 				cost_list[i] = -1
 		
 		cost_list_h = [h*hours for h in cost_list]
+
 		sum_server_list = sum(server_list)
+		
 		if price is None:
-			server_combination_t = (serverwithnoprice(cpus,sum_server_list,server_list))
-			server_combination_t = [float(val) for val in server_combination_t]
-			total_cost.append([a*b for a,b in zip(server_combination_t,cost_list_h)])
-			server_combination.append(server_combination_t)
+			server_combination_t = serverWithNoprice(cpus,sum_server_list,server_list)
 		
 		elif cpus is None:
 			server_combination_t = serverWithnoCPU(price,cost_list_h,server_list)
-			server_combination_t = [float(val) for val in server_combination_t]
-			total_cost.append([a*b for a,b in zip(server_combination_t,cost_list_h)])
-			server_combination.append(server_combination_t)
-		else:
-			server_combination_t = serverwithboth(cpus,sum_server_list,server_list,cost_list_h,price)
-			server_combination_t = [float(val) for val in server_combination_t]
-			total_cost.append([a*b for a,b in zip(server_combination_t,cost_list_h)])
-			server_combination.append(server_combination_t)
 
-	return total_cost,server_combination       
+		else:
+			server_combination_t = serverWithCpuPrice(cpus,sum_server_list,server_list,cost_list_h,price)
+		
+		retServerList,retTotalCost = getServerCombination(server_combination_t, total_cost, cost_list_h, server_combination)
+	
+	return retTotalCost,retServerList       
 		
 
 def get_costs(hours,cpus,price):
@@ -163,4 +165,4 @@ def get_costs(hours,cpus,price):
 	
 
 	
-get_costs(5,None,30.12)
+get_costs(5,110,None)
