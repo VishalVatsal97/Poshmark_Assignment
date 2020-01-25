@@ -10,7 +10,13 @@ input_instances = {"us-east":{
 					 "2xlarge":0.413,
 					 "4xlarge":0.89,
 					 "8xlarge":1.3,
-					 "10xlarge":2.97}}
+					 "10xlarge":2.97},
+					 "asia":{
+						 "large":0.11,
+						 "xlarge":0.20,
+						 "4xlarge":0.67,
+						 "8xlarge":1.18
+					 }}
 
 
 server_list_map = ["large","xlarge","2xlarge","4xlarge","8xlarge","10xlarge"]
@@ -99,6 +105,8 @@ def getServerCombination(server_combination_t,total_cost,cost_list_h,server_comb
 	
 	total_cost.append([a*b for a,b in zip(server_combination_t,cost_list_h)])
 	
+	server_combination_t = [int(val) for val in server_combination_t]
+
 	server_combination.append(server_combination_t)
 
 	return server_combination,total_cost
@@ -143,13 +151,13 @@ def get_costs(hours,cpus,price):
 	cost_list = []
 	ans_list  = []
 	if hours is None or hours < 0:
-		print "Invalid input (hour)"
+		print("Invalid input (hour)")
 		return
 	elif price < 0:
-		print "Invalid input (price)"
+		print ("Invalid input (price)")
 		return
 	elif cpus < 0:
-		print "Invalid input (cpus)"
+		print ("Invalid input (cpus)")
 		return
 	else:
 		totalCost,retServers = setupServerCostList(server_list_map,hours,cpus,price)
