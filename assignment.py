@@ -16,14 +16,14 @@ input_instances = {"us-east":{
 server_list_map = ["large","xlarge","2xlarge","4xlarge","8xlarge","10xlarge"]
 
 def serverWithCpuPrice(no_cpu,sum_li,server_list,cost_list,max_price):
-	i = len(server_list)
-	ans = [0 for q in range(i)]
+	i           = len(server_list)
+	ans         = [0 for q in range(i)]
 	cost_margin = [0 for p in range(i)]
 	while sum(cost_margin) <= max_price :					
 		if no_cpu > sum_li :	
 			if(sum(cost_list[0:i]) <= max_price):				
 				if sum_li > 0:
-					incr = no_cpu // sum_li
+					incr   = no_cpu // sum_li
 					no_cpu = no_cpu % sum_li
 				else:
 					ans[0] = ans[0] + 1
@@ -53,9 +53,9 @@ def serverWithCpuPrice(no_cpu,sum_li,server_list,cost_list,max_price):
 	return ans
 
   
-def serverWithNoprice(no_cpu,sum_li,server_list):
+def serverWithNoPrice(no_cpu,sum_li,server_list):
 
-	i = len(server_list)
+	i   = len(server_list)
 	ans = [0 for q in range(i)]
 	while i >= 0 :
 		if no_cpu > sum_li :
@@ -76,17 +76,17 @@ def serverWithNoprice(no_cpu,sum_li,server_list):
 			i = i - 1
 	return ans
 
-def serverWithnoCPU(price,cost_list,server_list):
-	i = len(cost_list)
-	ans = [0 for val in range(i)]
-	cost  = 0
+def serverWithNoCPU(price,cost_list,server_list):
+	i         = len(cost_list)
+	ans       = [0 for val in range(i)]
+	cost      = 0
 	rem_price = price
 	while i >= 0:
 		if cost_list[i-1] < 0:
 			i = i-1
 		elif cost_list[i-1] <= rem_price:
 			rem_price = rem_price - cost_list[i-1]
-			if  server_list[i-1] > 0:
+			if server_list[i-1] > 0:
 				ans[i-1] = ans[i-1] + 1
 		else:
 			i = i-1
@@ -105,9 +105,10 @@ def getServerCombination(server_combination_t,total_cost,cost_list_h,server_comb
 
 def setupServerCostList(server_list_map,hours,cpus,price):
 	server_combination_t = []
-	server_combination = []
-	total_cost = []
-	for k,v in input_instances.items():   
+	server_combination   = []
+	total_cost           = []
+	for k,v in input_instances.items():
+
 		server_list = [0 for s in range(len(server_list_map))]
 
 		cost_list = [0 for s in range(len(server_list_map))]
@@ -115,19 +116,19 @@ def setupServerCostList(server_list_map,hours,cpus,price):
 		for i in range(len(server_list_map)):
 			if server_list_map[i] in list(v.keys()):
 				server_list[i] = 2**i
-				cost_list[i] = v[server_list_map[i]]
+				cost_list[i]   = v[server_list_map[i]]
 			else:
-				cost_list[i] = -1
+				cost_list[i]   = -1
 		
 		cost_list_h = [h*hours for h in cost_list]
 
 		sum_server_list = sum(server_list)
 		
-		if price is None:
-			server_combination_t = serverWithNoprice(cpus,sum_server_list,server_list)
+		if price is 0:
+			server_combination_t = serverWithNoPrice(cpus,sum_server_list,server_list)
 		
-		elif cpus is None:
-			server_combination_t = serverWithnoCPU(price,cost_list_h,server_list)
+		elif cpus is 0:
+			server_combination_t = serverWithNoCPU(price,cost_list_h,server_list)
 
 		else:
 			server_combination_t = serverWithCpuPrice(cpus,sum_server_list,server_list,cost_list_h,price)
@@ -139,30 +140,43 @@ def setupServerCostList(server_list_map,hours,cpus,price):
 
 def get_costs(hours,cpus,price):
 	
-	totalCost,retServers = setupServerCostList(server_list_map,hours,cpus,price)
 	cost_list = []
-	ans_list = []
-	flag = 0
-	for i in range(len(totalCost)):
-		cost_list.append(sum(totalCost[i]))
-	for k in input_instances.keys():
-		ans_dict = {}
-		if flag == 0:
-			counter = 0
-			flag = 1
-		else:
-			counter += 1
-		ans_dict["region"] = k
-		ans_dict["total_cost"] = cost_list[counter]
-		ans_dict["servers"] = []
-		for s in range(len(server_list_map)):
-			if retServers[counter][s] > 0.0:
-				sr = (server_list_map[s],retServers[counter][s])
-				ans_dict["servers"].append(sr)
-		ans_list.append(ans_dict)
+	ans_list  = []
+	if hours is None or hours < 0:
+		print "Invalid input (hour)"
+		return
+	elif price < 0:
+		print "Invalid input (price)"
+		return
+	elif cpus < 0:
+		print "Invalid input (cpus)"
+		return
+	else:
+		totalCost,retServers = setupServerCostList(server_list_map,hours,cpus,price)
+		flag = 0
+		
+		for i in range(len(totalCost)):
+			cost_list.append(sum(totalCost[i]))
+		
+		for k in input_instances.keys():
+			ans_dict = {}
+			if flag == 0:
+				counter = 0
+				flag    = 1
+			else:
+				counter += 1
+			ans_dict["region"]     = k
 
-	print(sorted(ans_list, key = lambda i:i["total_cost"]))
-	
+			ans_dict["total_cost"] = cost_list[counter]
+			
+			ans_dict["servers"]    = []
+			
+			for s in range(len(server_list_map)):
+				if retServers[counter][s] > 0.0:
+					sr = (server_list_map[s],retServers[counter][s])
+					ans_dict["servers"].append(sr)
+			ans_list.append(ans_dict)
 
+		ans_list = sorted(ans_list, key = lambda i:i["total_cost"])
 	
-get_costs(5,110,None)
+	return ans_list
