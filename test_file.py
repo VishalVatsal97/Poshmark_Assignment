@@ -1,4 +1,8 @@
 import assignment
+import sys
 
-val = assignment.get_costs(2,0,29)
+hours = int(sys.argv[1])
+cpus = int(sys.argv[2])
+price = float(sys.argv[3])
+val = assignment.get_costs(hours,cpus,price)
 print(val)
