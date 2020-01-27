@@ -21,10 +21,7 @@ input_instances = {"us-east":{
 
 server_list_map = ["large","xlarge","2xlarge","4xlarge","8xlarge","10xlarge"]
 
-""" This case(when both no of cpu and price is given) seems like a classical knapsack problem where
-    where we have to maximize value of item and keep the weight <= capacity of knapsack. But the problem here is that the
-    cost given is floating point number and since it will be used to access index of array, cannot be used and hence eliminates the
-    use of dynamic programming"""
+
 
 def serverWithCpuPrice(no_cpu,sum_li,server_list,cost_list,max_price):
     i           = len(server_list)
@@ -89,6 +86,11 @@ def serverWithNoPrice(no_cpu,sum_li,server_list):
             i = i - 1
     return ans
 
+""" This case(when only price is given) seems like a classical knapsack problem where
+    where we have to maximize value of item and keep the weight <= capacity of knapsack. But the problem here is that the
+    cost given is floating point number and since it will be used to access index of array, cannot be used and hence eliminates the
+    use of dynamic programming"""
+    
 def serverWithNoCPU(price,cost_list,server_list):
     i         = len(cost_list)
     ans       = [0 for val in range(i)]
